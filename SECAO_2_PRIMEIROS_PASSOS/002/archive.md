@@ -1,0 +1,1 @@
+# LINK para acesso a outro conteúdo
