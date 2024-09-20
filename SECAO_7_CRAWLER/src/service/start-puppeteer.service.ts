@@ -1,4 +1,8 @@
+import fs from 'node:fs';
+
+import { IFileGenerator } from 'interface/file-generator.interface.js';
 import puppeteer, { Page } from 'puppeteer';
+import path from 'node:path';
 
 class StartPuppeteerService {
   constructor() {}
@@ -16,6 +20,28 @@ class StartPuppeteerService {
 
       return resolve(page);
     });
+  }
+
+  public fileGenerator(payload: Array<IFileGenerator>, fileName: string) {
+    const pathTmp = 'tmp';
+
+    if (!fs.existsSync(path.resolve(pathTmp))) {
+      fs.mkdirSync(path.resolve(pathTmp));
+      console.log('Pasta Criada com Sucesso!');
+    }
+
+    const csvRows = payload.map((res: IFileGenerator) => {
+      return `${res.link};${res.title};${res.date}`;
+    });
+
+    const csvContent = `Link;Title;Data da Postagem\n${csvRows.join('\n')}`;
+
+    try {
+      fs.writeFileSync(`${path.resolve(pathTmp, fileName)}.csv`, csvContent);
+      return console.log('Arquivo Criado com Sucesso!');
+    } catch (error) {
+      console.log(error);
+    }
   }
 }
 
