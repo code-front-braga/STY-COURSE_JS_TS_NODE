@@ -1,23 +1,24 @@
-import { Request, Response, RequestHandler } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { Request, RequestHandler, Response } from 'express';
+import { z } from 'zod';
 
 class UserController {
-  public create: RequestHandler = async (req: Request, res: Response): Promise<void> => {
-    const prisma = new PrismaClient();
+  public create: RequestHandler = (req: Request, res: Response): void => {
+    const { name, email, password } = req.body;
 
-    await prisma.user.create({
-      data: {
-        email: 'leo.braga06@hotmail.com',
-        name: 'Leonardo Braga',
-      },
-    });
-
-    res.json({ data: 'Criado com sucesso!' });
-  };
-
-  public read: RequestHandler = (req: Request, res: Response): void => {
-    res.json({ data: 'Hello World!' });
-  };
+    try {
+      const ZUserSchema = z.object({
+        name: z.string(),
+        email: z.string().email({ message: 'Email é obrigatório.' }),
+        password: z.string().min(8, { message: 'Senha é obrigatória.' }),
+      });
+      ZUserSchema.parse({ name, email, password });
+    } catch (err: any) {
+      res.status(400).json({
+        message: "Dados Inválidos.",
+        error: err.errors,
+      });
+    }
+  }
 }
 
 export const userController = new UserController();
